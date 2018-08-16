@@ -10,7 +10,7 @@ beginning of the line, followed by 16 HEX bytes of the file, followed by
 the same 16 bytes presented as ASCII characters, followed by the decimal
 offset of the byte at the start of the line.
 
-If a file contained the data "The quick brown fox\n\tjumps over the lazy dog."
+If a file contained the data "The quick brown fox\\n\\tjumps over the lazy dog."
 then the output would be:
 
 ::
