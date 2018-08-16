@@ -10,7 +10,7 @@ beginning of the line, followed by 16 HEX bytes of the file, followed by
 the same 16 bytes presented as ASCII characters, followed by the decimal
 offset of the byte at the start of the line.
 
-If a file contained the data 'The quick brown fox\n\tjumps over the lazy dog.'
+If a file contained the data "The quick brown fox\n\tjumps over the lazy dog."
 then the output would be:
 
 ::
@@ -20,7 +20,7 @@ then the output would be:
     0020  74 68 65 20 6c 61 7a 79 20 64 6f 67 2e           |the lazy dog.|     32
 
 Note that the non-printable characters in the ASCII part are replaced by the
-'.' character.  The "|" characters bracketing the ASCII characters show the
+"." character.  The "|" characters bracketing the ASCII characters show the
 limits of the ASCII characters.
 
 Example
