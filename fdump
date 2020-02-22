@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 
-"""File hexdump program."""
+"""File hexdump program.
+
+usage: fdump [-h] <file>
+
+where <file> is the file to produce the hexdump of.
+"""
 
 import sys
 import getopt
 import os.path
 
 
-# size of hex/char buffers in the line
+# size of hex/char buffers in the output line
 HEXLEN = 48
 CHARLEN = 16
 
@@ -41,7 +46,7 @@ def hexdump(filename):
     """
 
     # we used to read the entire file into memory but this delayed things
-    # when doing "fdump really_big_file | more"
+    # when doing "fdump really_big_file | more", so now read 16 bytes at a time
     with open(filename, 'rb', 8192) as f:
         offset = 0
         while True:
@@ -53,7 +58,6 @@ def hexdump(filename):
             except IOError:
                 return
             offset += 16
-
 
 def hexdump_line(bseq, offset):
     """Generate one line of fdump output.
@@ -72,46 +76,47 @@ def hexdump_line(bseq, offset):
             chbuff += '.'
     hexbuff = (hexbuff + ' '*HEXLEN)[:HEXLEN]
     chbuff = (chbuff + '|' + ' '*CHARLEN)[:CHARLEN+1]
+
     return f'{offset:04X}  {hexbuff} |{chbuff}  {offset}'
 
 
 ################################################################################
 
 
-ProgName = os.path.basename(sys.argv[0])
-
-
-def usage():
-    print(f'usage: {ProgName} <file>')
-    print('where <file> is the file to produce the hexdump of.')
-
-
-def main(argv):
-    try:
-        opts, args = getopt.gnu_getopt(argv, "h", ["help"])
-    except getopt.GetoptError:
-        usage()
-        return 10
-
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            usage()
-            return 0
-
-    if len(args) != 2:
-        usage()
-        return 10
-
-    filename = args[1]
-    try:
-        f = open(filename)
-    except IOError:
-        print(f"Sorry, can't find file '{filename}'")
-        return 10
-    f.close()
-
-    hexdump(filename)
-
-
 if __name__ == "__main__":
+    ProgName = os.path.basename(sys.argv[0])
+    
+    def usage(msg=None):
+        if msg:
+            print('-' * 60)
+            print(msg)
+            print('-' * 60, '\n')
+        print(__doc__)
+    
+    def main(argv):
+        try:
+            opts, args = getopt.gnu_getopt(argv, "h", ["help"])
+        except getopt.GetoptError:
+            usage('Bad option')
+            return 10
+    
+        for opt, arg in opts:
+            if opt in ("-h", "--help"):
+                usage()
+                return 0
+    
+        if len(args) != 2:
+            usage()
+            return 10
+    
+        filename = args[1]
+        try:
+            f = open(filename)
+        except IOError:
+            print(f"Sorry, can't find file '{filename}'")
+            return 10
+        f.close()
+    
+        hexdump(filename)
+
     sys.exit(main(sys.argv))
