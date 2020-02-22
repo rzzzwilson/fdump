@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """File hexdump program."""
 
@@ -7,6 +7,7 @@ import getopt
 import os.path
 
 
+# size of hex/char buffers in the line
 HEXLEN = 48
 CHARLEN = 16
 
@@ -14,82 +15,78 @@ CHARLEN = 16
 def hexdump(filename):
     """A function that generates a 'hex dump' of a file.
 
-Calling this function for a file containing
-'The quick brown fox\n\tjumps over the lazy dog.'
-returns a string containing:
-0000  54 68 65 20 71 75 69 63 6b 20 62 72 6f 77 6e 20  |The quick brown |  0
-0010  66 6f 78 0a 09 6a 75 6d 70 73 20 6f 76 65 72 20  |fox..jumps over |  16
-0020  74 68 65 20 6c 61 7a 79 20 64 6f 67 2e           |the lazy dog.|     32
+    Calling this function for a file containing
+    'The quick brown fox\n\tjumps over the lazy dog.'
+    returns a string containing:
+    0000  54 68 65 20 71 75 69 63 6b 20 62 72 6f 77 6e 20  |The quick brown |  0
+    0010  66 6f 78 0a 09 6a 75 6d 70 73 20 6f 76 65 72 20  |fox..jumps over |  16
+    0020  74 68 65 20 6c 61 7a 79 20 64 6f 67 2e           |the lazy dog.|     32
 
-+---------+---------+---------+---------+---------+---------+---------+-------
-0         1         2         3         4         5         6         7 
-0         0         0         0         0         0         0         0
+    +---------+---------+---------+---------+---------+---------+---------+-------
+    0         1         2         3         4         5         6         7
+    0         0         0         0         0         0         0         0
 
-Each line of the dump contains info about 16 bytes of the input string.
+    Each line of the dump contains info about 16 bytes of the input string.
 
-The 4 hex digits starting at column 0 are the offset in hex of the first byte.
+    The 4 hex digits starting at column 0 are the offset in hex of the first byte.
 
-The 16 hex digit pairs starting at column 6 and ending at column 52 are the
-16 byte values in hex.
+    The 16 hex digit pairs starting at column 6 and ending at column 52 are the
+    16 byte values in hex.
 
-The characters spanning columns 56-71 are the 16 printable characters.  If a
-character is not printable it is replaced by a '.' character.
+    The characters spanning columns 56-71 are the 16 printable characters.  If a
+    character is not printable it is replaced by a '.' character.
 
-The decimal number starting at column 75 is the decimal offset of the first
-byte in the line.
+    The decimal number starting at column 75 is the decimal offset of the first
+    byte in the line.
     """
 
-    f = open(filename, 'rb', 8192)
+    # we used to read the entire file into memory but this delayed things
+    # when doing "fdump really_big_file | more"
+    with open(filename, 'rb', 8192) as f:
+        offset = 0
+        while True:
+            data = f.read(16)   # read up to 16 bytes at a time
+            if len(data) == 0:
+                break
+            try:
+                print(hexdump_line(data, offset))
+            except IOError:
+                return
+            offset += 16
 
-    offset = 0
-    while True:
-        data = f.read(16)
-        if len(data) == 0:
-            break
-        try:
-            print(hexdump_line(data, offset))
-        except IOError:
-            return
-        offset += 16
 
-    f.close()
-
-
-def hexdump_line(s, offset):
+def hexdump_line(bseq, offset):
     """Generate one line of fdump output.
 
-    s       string to convert (16 bytes or less)
+    bseq    byte sequence to convert (16 bytes or less)
     offset  offset from start of dump
     """
 
-    hex = ''
-    char = ''
-    for c in s:
-        ordc = ord(c)
-        hex += '%02x ' % ordc
-        if ord(' ') <= ordc <= ord('~'):
-            char += c
+    hexbuff = ''
+    chbuff = ''
+    for ch in bseq:
+        hexbuff += '%02x ' % ch
+        if ord(' ') <= ch <= ord('~'):
+            chbuff += chr(ch)
         else:
-            char += '.'
-    hex = (hex + ' '*HEXLEN)[:HEXLEN]
-    char = (char + '|' + ' '*CHARLEN)[:CHARLEN+1]
-    return '%04X  %s |%s  %d' % (offset, hex, char, offset)
+            chbuff += '.'
+    hexbuff = (hexbuff + ' '*HEXLEN)[:HEXLEN]
+    chbuff = (chbuff + '|' + ' '*CHARLEN)[:CHARLEN+1]
+    return f'{offset:04X}  {hexbuff} |{chbuff}  {offset}'
 
 
 ################################################################################
 
 
-ProgName = None
+ProgName = os.path.basename(sys.argv[0])
+
 
 def usage():
-    print 'usage: %s <file>' % ProgName
-    print 'where <file> is the file to produce the hexdump of.'
+    print(f'usage: {ProgName} <file>')
+    print('where <file> is the file to produce the hexdump of.')
+
 
 def main(argv):
-    global ProgName
-
-    ProgName = os.path.basename(argv[0])
-
     try:
         opts, args = getopt.gnu_getopt(argv, "h", ["help"])
     except getopt.GetoptError:
@@ -109,7 +106,7 @@ def main(argv):
     try:
         f = open(filename)
     except IOError:
-        print "Sorry, can't find file '%s'" % filename
+        print(f"Sorry, can't find file '{filename}'")
         return 10
     f.close()
 
