@@ -2,9 +2,10 @@
 
 """File hexdump program.
 
-usage: fdump [-h] <file>
+usage: fdump [-h] [-o <outfile>] <infile>
 
-where <file> is the file to produce the hexdump of.
+where <infile> is the file to produce the hexdump of, and
+      <outfile> is the output file of fdump, if supplied.
 """
 
 import sys
@@ -17,8 +18,11 @@ HEXLEN = 48
 CHARLEN = 16
 
 
-def hexdump(filename):
+def hexdump(filename, outfile=sys.stdout):
     """A function that generates a 'hex dump' of a file.
+
+    filename  name of the file to dump
+    outfile   file-like object the hex data is written to
 
     Calling this function for a file containing
     'The quick brown fox\n\tjumps over the lazy dog.'
@@ -53,10 +57,12 @@ def hexdump(filename):
             data = f.read(16)   # read up to 16 bytes at a time
             if len(data) == 0:
                 break
+
             try:
-                print(hexdump_line(data, offset))
+                outfile.write(hexdump_line(data, offset) + '\n')
             except IOError:
-                return
+                break
+
             offset += 16
 
 def hexdump_line(bseq, offset):
@@ -84,8 +90,7 @@ def hexdump_line(bseq, offset):
 
 
 if __name__ == "__main__":
-    ProgName = os.path.basename(sys.argv[0])
-    
+
     def usage(msg=None):
         if msg:
             print('-' * 60)
@@ -95,12 +100,16 @@ if __name__ == "__main__":
     
     def main(argv):
         try:
-            opts, args = getopt.gnu_getopt(argv, "h", ["help"])
+            opts, args = getopt.gnu_getopt(argv, "ho:", ["help", "outfile="])
         except getopt.GetoptError:
             usage('Bad option')
             return 10
+
+        outfile = sys.stdout     # default output
     
         for opt, arg in opts:
+            if opt in ("-o", "--outfile"):
+                outfile = open(arg, 'w')
             if opt in ("-h", "--help"):
                 usage()
                 return 0
@@ -117,6 +126,6 @@ if __name__ == "__main__":
             return 10
         f.close()
     
-        hexdump(filename)
+        hexdump(filename, outfile=outfile)
 
     sys.exit(main(sys.argv))
