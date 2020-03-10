@@ -2,21 +2,49 @@
 
 """File hexdump program.
 
-usage: fdump [-h] [-o <outfile>] <infile>
+usage: fdump [-h] [-c <codename>] [-o <outfile>] <infile>
 
-where <infile> is the file to produce the hexdump of, and
+where <codename> is the name of the codepage to be used,
+      <infile> is the file to produce the hexdump of, and
       <outfile> is the output file of fdump, if supplied.
+
+If the "-c <codename>" option is used then "unprintable"
+characters are those unprintable in the named codepage.
+Recognized <codename>s are:
+    ASCII                       the default
+    ISO-8859-1 or Latin-1
+Names are case-insensitive.
 """
 
 import sys
 import getopt
+import string
 import os.path
 
+
+# list of recognized code names
+KnownCodes = ['ascii', 'iso-8859-1', 'latin-1',]
+
+# code we are using
+CodeName = 'ascii'
 
 # size of hex/char buffers in the output line
 HEXLEN = 48
 CHARLEN = 16
 
+
+def isprintable(ch):
+    """Returns True if byte value 'ch' is printable.
+
+    Uses 'CodeName' to determine what is printable.
+    """
+
+    if CodeName == 'ascii':
+        return ord(' ') <= ch <= ord('~')
+    elif CodeName in ['latin-1', 'iso-8859-1']:
+        # we can print the UNICODE printable chars in the 8-bit set
+        # because they mirror the Latin-1 codepage
+        return ord(' ') <= ch <= ord('~') or 0xA1 <= ch <= 0XFF
 
 def hexdump(filename, outfile=sys.stdout):
     """A function that generates a 'hex dump' of a file.
@@ -76,7 +104,7 @@ def hexdump_line(bseq, offset):
     chbuff = ''
     for ch in bseq:
         hexbuff += '%02x ' % ch
-        if ord(' ') <= ch <= ord('~'):
+        if isprintable(ch):
             chbuff += chr(ch)
         else:
             chbuff += '.'
@@ -99,8 +127,11 @@ if __name__ == "__main__":
         print(__doc__)
     
     def main(argv):
+        global CodeName
+
         try:
-            opts, args = getopt.gnu_getopt(argv, "ho:", ["help", "outfile="])
+            opts, args = getopt.gnu_getopt(argv, "c:ho:",
+                                           ["code=", "help", "outfile="])
         except getopt.GetoptError:
             usage('Bad option')
             return 10
@@ -108,6 +139,8 @@ if __name__ == "__main__":
         outfile = sys.stdout     # default output
     
         for opt, arg in opts:
+            if opt in ("-c", "--code"):
+                CodeName = arg.lower()
             if opt in ("-o", "--outfile"):
                 outfile = open(arg, 'w')
             if opt in ("-h", "--help"):
@@ -118,6 +151,10 @@ if __name__ == "__main__":
             usage()
             return 10
     
+        if CodeName not in KnownCodes:
+            usage(f'Bad code page name: {CodeName}')
+            return 10
+
         filename = args[1]
         try:
             f = open(filename)
