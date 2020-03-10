@@ -21,7 +21,8 @@ then the output would be:
 
 Note that the non-printable characters in the ASCII part are replaced by the
 "." character.  The "|" characters bracketing the ASCII characters show the
-limits of the ASCII characters.
+limits of the ASCII characters.  The characters considered "unprintable" are
+controlled by the "-c" option.
 
 Example
 -------
@@ -67,4 +68,4 @@ itself:
     0200  30 20 36 34 20 36 66 20 36 37 20 32 65 20 20 20  |0 64 6f 67 2e   |  512
     0210  20 20 20 20 20 20 20 20 7c 74 68 65 20 6c 61 7a  |        |the laz|  528
     0220  79 20 64 6f 67 2e 7c 20 20 20 20 20 33 32 0a 0a  |y dog.|     32..|  544
-    ...
+    ... lots of lines snipped
