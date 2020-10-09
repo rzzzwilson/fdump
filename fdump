@@ -168,4 +168,8 @@ if __name__ == "__main__":
     
         hexdump(filename, outfile=outfile)
 
-    sys.exit(main(sys.argv))
+    try:
+        sys.exit(main(sys.argv))
+    except KeyboardInterrupt:
+        # handle ^C nicely
+        print()
