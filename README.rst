@@ -22,7 +22,14 @@ then the output would be:
 Note that the non-printable characters in the ASCII part are replaced by the
 "." character.  The "|" characters bracketing the ASCII characters show the
 limits of the ASCII characters.  The characters considered "unprintable" are
-controlled by the "-c" option.
+controlled by the "-8" option.
+
+Do this to see the optiona available:
+
+::
+
+    $ fdump -h
+
 
 Example
 -------
@@ -36,36 +43,30 @@ itself:
     0000  23 21 2f 75 73 72 2f 62 69 6e 2f 65 6e 76 20 70  |#!/usr/bin/env p|  0
     0010  79 74 68 6f 6e 33 0a 0a 22 22 22 46 69 6c 65 20  |ython3.."""File |  16
     0020  68 65 78 64 75 6d 70 20 70 72 6f 67 72 61 6d 2e  |hexdump program.|  32
-    0030  22 22 22 0a 0a 69 6d 70 6f 72 74 20 73 79 73 0a  |"""..import sys.|  48
-    0040  69 6d 70 6f 72 74 20 67 65 74 6f 70 74 0a 69 6d  |import getopt.im|  64
-    0050  70 6f 72 74 20 6f 73 2e 70 61 74 68 0a 0a 0a 48  |port os.path...H|  80
-    0060  45 58 4c 45 4e 20 3d 20 34 38 0a 43 48 41 52 4c  |EXLEN = 48.CHARL|  96
-    0070  45 4e 20 3d 20 31 36 0a 0a 0a 64 65 66 20 68 65  |EN = 16...def he|  112
-    0080  78 64 75 6d 70 28 66 69 6c 65 6e 61 6d 65 29 3a  |xdump(filename):|  128
-    0090  0a 20 20 20 20 22 22 22 41 20 66 75 6e 63 74 69  |.    """A functi|  144
-    00A0  6f 6e 20 74 68 61 74 20 67 65 6e 65 72 61 74 65  |on that generate|  160
-    00B0  73 20 61 20 27 68 65 78 20 64 75 6d 70 27 20 6f  |s a 'hex dump' o|  176
-    00C0  66 20 61 20 66 69 6c 65 2e 0a 0a 43 61 6c 6c 69  |f a file...Calli|  192
-    00D0  6e 67 20 74 68 69 73 20 66 75 6e 63 74 69 6f 6e  |ng this function|  208
-    00E0  20 66 6f 72 20 61 20 66 69 6c 65 20 63 6f 6e 74  | for a file cont|  224
-    00F0  61 69 6e 69 6e 67 0a 27 54 68 65 20 71 75 69 63  |aining.'The quic|  240
-    0100  6b 20 62 72 6f 77 6e 20 66 6f 78 5c 6e 5c 74 6a  |k brown fox\n\tj|  256
-    0110  75 6d 70 73 20 6f 76 65 72 20 74 68 65 20 6c 61  |umps over the la|  272
-    0120  7a 79 20 64 6f 67 2e 27 0a 72 65 74 75 72 6e 73  |zy dog.'.returns|  288
-    0130  20 61 20 73 74 72 69 6e 67 20 63 6f 6e 74 61 69  | a string contai|  304
-    0140  6e 69 6e 67 3a 0a 30 30 30 30 20 20 35 34 20 36  |ning:.0000  54 6|  320
-    0150  38 20 36 35 20 32 30 20 37 31 20 37 35 20 36 39  |8 65 20 71 75 69|  336
-    0160  20 36 33 20 36 62 20 32 30 20 36 32 20 37 32 20  | 63 6b 20 62 72 |  352
-    0170  36 66 20 37 37 20 36 65 20 32 30 20 20 7c 54 68  |6f 77 6e 20  |Th|  368
-    0180  65 20 71 75 69 63 6b 20 62 72 6f 77 6e 20 7c 20  |e quick brown | |  384
-    0190  20 30 0a 30 30 31 30 20 20 36 36 20 36 66 20 37  | 0.0010  66 6f 7|  400
-    01A0  38 20 30 61 20 30 39 20 36 61 20 37 35 20 36 64  |8 0a 09 6a 75 6d|  416
-    01B0  20 37 30 20 37 33 20 32 30 20 36 66 20 37 36 20  | 70 73 20 6f 76 |  432
-    01C0  36 35 20 37 32 20 32 30 20 20 7c 66 6f 78 2e 2e  |65 72 20  |fox..|  448
-    01D0  6a 75 6d 70 73 20 6f 76 65 72 20 7c 20 20 31 36  |jumps over |  16|  464
-    01E0  0a 30 30 32 30 20 20 37 34 20 36 38 20 36 35 20  |.0020  74 68 65 |  480
-    01F0  32 30 20 36 63 20 36 31 20 37 61 20 37 39 20 32  |20 6c 61 7a 79 2|  496
-    0200  30 20 36 34 20 36 66 20 36 37 20 32 65 20 20 20  |0 64 6f 67 2e   |  512
-    0210  20 20 20 20 20 20 20 20 7c 74 68 65 20 6c 61 7a  |        |the laz|  528
-    0220  79 20 64 6f 67 2e 7c 20 20 20 20 20 33 32 0a 0a  |y dog.|     32..|  544
+    0030  0a 0a 75 73 61 67 65 3a 20 66 64 75 6d 70 20 5b  |..usage: fdump [|  48
+    0040  2d 68 5d 20 5b 2d 38 5d 20 5b 2d 6f 20 3c 6f 75  |-h] [-8] [-o <ou|  64
+    0050  74 66 69 6c 65 3e 5d 20 3c 69 6e 66 69 6c 65 3e  |tfile>] <infile>|  80
+    0060  0a 0a 77 68 65 72 65 20 3c 69 6e 66 69 6c 65 3e  |..where <infile>|  96
+    0070  20 20 20 69 73 20 74 68 65 20 66 69 6c 65 20 74  |   is the file t|  112
+    0080  6f 20 70 72 6f 64 75 63 65 20 74 68 65 20 68 65  |o produce the he|  128
+    0090  78 64 75 6d 70 20 6f 66 2c 20 61 6e 64 0a 20 20  |xdump of, and.  |  144
+    00A0  20 20 20 20 3c 6f 75 74 66 69 6c 65 3e 20 20 69  |    <outfile>  i|  160
+    00B0  73 20 74 68 65 20 6f 75 74 70 75 74 20 66 69 6c  |s the output fil|  176
+    00C0  65 20 6f 66 20 66 64 75 6d 70 2c 20 69 66 20 73  |e of fdump, if s|  192
+    00D0  75 70 70 6c 69 65 64 2e 0a 0a 49 66 20 74 68 65  |upplied...If the|  208
+    00E0  20 22 2d 38 22 20 6f 70 74 69 6f 6e 20 69 73 20  | "-8" option is |  224
+    00F0  75 73 65 64 20 74 68 65 6e 20 22 70 72 69 6e 74  |used then "print|  240
+    0100  61 62 6c 65 22 20 63 68 61 72 61 63 74 65 72 73  |able" characters|  256
+    0110  0a 61 72 65 20 74 68 6f 73 65 20 70 72 69 6e 74  |.are those print|  272
+    0120  61 62 6c 65 20 63 68 61 72 61 63 74 65 72 73 20  |able characters |  288
+    0130  69 6e 20 74 68 65 20 66 75 6c 6c 20 38 2d 62 69  |in the full 8-bi|  304
+    0140  74 20 73 65 74 2c 20 6e 6f 74 0a 6a 75 73 74 20  |t set, not.just |  320
+    0150  74 68 65 20 6e 6f 72 6d 61 6c 20 37 2d 62 69 74  |the normal 7-bit|  336
+    0160  20 41 53 43 49 49 20 70 72 69 6e 74 61 62 6c 65  | ASCII printable|  352
+    0170  73 2e 0a 22 22 22 0a 0a 69 6d 70 6f 72 74 20 73  |s.."""..import s|  368
+    0180  79 73 0a 69 6d 70 6f 72 74 20 6d 61 74 68 0a 69  |ys.import math.i|  384
+    0190  6d 70 6f 72 74 20 67 65 74 6f 70 74 0a 69 6d 70  |mport getopt.imp|  400
+    01A0  6f 72 74 20 73 74 72 69 6e 67 0a 69 6d 70 6f 72  |ort string.impor|  416
+    01B0  74 20 6f 73 2e 70 61 74 68 0a 0a 0a 23 20 64 65  |t os.path...# de|  432
+    01C0  74 65 72 6d 69 6e 65 73 20 77 68 61 74 20 61 72  |termines what ar|  448
     ... lots of lines snipped

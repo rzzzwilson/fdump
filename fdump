@@ -2,49 +2,45 @@
 
 """File hexdump program.
 
-usage: fdump [-h] [-c <codename>] [-o <outfile>] <infile>
+usage: fdump [-h] [-8] [-o <outfile>] <infile>
 
-where <codename> is the name of the codepage to be used,
-      <infile> is the file to produce the hexdump of, and
-      <outfile> is the output file of fdump, if supplied.
+where <infile>   is the file to produce the hexdump of, and
+      <outfile>  is the output file of fdump, if supplied.
 
-If the "-c <codename>" option is used then "unprintable"
-characters are those unprintable in the named codepage.
-Recognized <codename>s are:
-    ASCII                       the default
-    ISO-8859-1 or Latin-1
-Names are case-insensitive.
+If the "-8" option is used then "printable" characters
+are those printable characters in the full 8-bit set, not
+just the normal 7-bit ASCII printables.
 """
 
 import sys
+import math
 import getopt
 import string
 import os.path
 
 
-# list of recognized code names
-KnownCodes = ['ascii', 'iso-8859-1', 'latin-1',]
+# determines what are "printable" characters
+Printable = 7           # 7 bit ASCII is the default
 
-# code we are using
-CodeName = 'ascii'
+UnprintableChar = '.'   # print this if char not printable
 
 # size of hex/char buffers in the output line
-HEXLEN = 48
-CHARLEN = 16
+HexLen = 48
+CharLen = 16
 
 
 def isprintable(ch):
     """Returns True if byte value 'ch' is printable.
 
-    Uses 'CodeName' to determine what is printable.
+    Uses 'Printable' to determine what is printable.
     """
 
-    if CodeName == 'ascii':
+    if Printable == 7:
         return ord(' ') <= ch <= ord('~')
-    elif CodeName in ['latin-1', 'iso-8859-1']:
-        # we can print the UNICODE printable chars in the 8-bit set
-        # because they mirror the Latin-1 codepage
-        return ord(' ') <= ch <= ord('~') or 0xA1 <= ch <= 0XFF
+
+    # otherwise allow the full 8 bits
+    return ord(' ') <= ch <= ord('~') or 0xA1 <= ch <= 0XFF
+
 
 def hexdump(filename, outfile=sys.stdout):
     """A function that generates a 'hex dump' of a file.
@@ -77,6 +73,15 @@ def hexdump(filename, outfile=sys.stdout):
     byte in the line.
     """
 
+    # get the input filesize and compute the hex offset width required (multiple of 2)
+    filesize = os.path.getsize(filename)
+    if filesize == 0:
+        print(f"File '{filename}' is empty.")
+        return
+
+    offset_width = math.ceil(math.log(filesize, 16))
+    offset_width = math.ceil(offset_width/2) * 2
+
     # we used to read the entire file into memory but this delayed things
     # when doing "fdump really_big_file | more", so now read 16 bytes at a time
     with open(filename, 'rb', 8192) as f:
@@ -87,17 +92,19 @@ def hexdump(filename, outfile=sys.stdout):
                 break
 
             try:
-                outfile.write(hexdump_line(data, offset) + '\n')
+                outfile.write(hexdump_line(data, offset, offset_width) + '\n')
             except IOError:
                 break
 
             offset += 16
 
-def hexdump_line(bseq, offset):
+
+def hexdump_line(bseq, offset, owidth):
     """Generate one line of fdump output.
 
     bseq    byte sequence to convert (16 bytes or less)
     offset  offset from start of dump
+    owidth  the number of digits for the HEX offset number
     """
 
     hexbuff = ''
@@ -108,10 +115,10 @@ def hexdump_line(bseq, offset):
             chbuff += chr(ch)
         else:
             chbuff += '.'
-    hexbuff = (hexbuff + ' '*HEXLEN)[:HEXLEN]
-    chbuff = (chbuff + '|' + ' '*CHARLEN)[:CHARLEN+1]
+    hexbuff = (hexbuff + ' '*HexLen)[:HexLen]
+    chbuff = (chbuff + '|' + ' '*CharLen)[:CharLen+1]
 
-    return f'{offset:04X}  {hexbuff} |{chbuff}  {offset}'
+    return f'{offset:0{owidth}X}  {hexbuff} |{chbuff}  {offset}'
 
 
 ################################################################################
@@ -127,11 +134,11 @@ if __name__ == "__main__":
         print(__doc__)
     
     def main(argv):
-        global CodeName
+        global Printable
 
         try:
-            opts, args = getopt.gnu_getopt(argv, "c:ho:",
-                                           ["code=", "help", "outfile="])
+            opts, args = getopt.gnu_getopt(argv, "ho:8",
+                                           ["help", "outfile=", "eight"])
         except getopt.GetoptError:
             usage('Bad option')
             return 10
@@ -139,8 +146,8 @@ if __name__ == "__main__":
         outfile = sys.stdout     # default output
     
         for opt, arg in opts:
-            if opt in ("-c", "--code"):
-                CodeName = arg.lower()
+            if opt in ("-8", "--eight"):
+                Printable = 8
             if opt in ("-o", "--outfile"):
                 outfile = open(arg, 'w')
             if opt in ("-h", "--help"):
@@ -151,17 +158,13 @@ if __name__ == "__main__":
             usage()
             return 10
     
-        if CodeName not in KnownCodes:
-            usage(f'Bad code page name: {CodeName}')
-            return 10
-
         filename = args[1]
         try:
-            f = open(filename)
+            with open(filename) as f:
+                pass
         except IOError:
-            print(f"Sorry, can't find file '{filename}'")
+            print(f"Sorry, can't find file '{filename}'.")
             return 10
-        f.close()
     
         hexdump(filename, outfile=outfile)
 
